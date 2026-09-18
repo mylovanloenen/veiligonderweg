@@ -3,6 +3,14 @@
 Kaart met statistische veiligheid per buurt (politie-open-data) en live meldingen van onveilige situaties.
 Start met Amsterdam als testgebied. **Direct gevaar? Bel 112.**
 
+## Online demo
+
+Statische demo op GitHub Pages (snapshot van Amsterdam, meldingen worden niet opgeslagen):
+**https://mylovanloenen.github.io/veiligonderweg/**
+
+De demo wordt automatisch gebouwd bij elke push naar `main` (`.github/workflows/pages.yml`). Snapshot verversen:
+`docker compose up -d && ./scripts/export-demo.sh` en de wijzigingen in `web/public/demo/` committen.
+
 ## Installatie (5 commando's)
 
 Vereist: alleen Docker Desktop.
