@@ -29,6 +29,12 @@ body { background: #e5e7eb; }
 .emergency__dot { width: 9px; height: 9px; border-radius: 50%; background: #fff; animation: blink 1.4s infinite; }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
+/* Demo-banner (GitHub Pages) */
+.demo-banner {
+  position: absolute; z-index: 1150; bottom: 0; left: 0; right: 0; text-align: center;
+  background: #fef3c7; color: #92400e; font-size: 12px; padding: 4px 8px;
+}
+
 /* Zijpaneel (desktop) / bottom sheet (mobiel) */
 .panel {
   position: absolute; z-index: 1000; background: var(--panel); border-radius: var(--radius); box-shadow: var(--shadow);

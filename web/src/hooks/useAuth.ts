@@ -1,11 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
-import { api, getToken, setToken, type User } from '../api/client'
+import { api, getToken, IS_DEMO, setToken, type User } from '../api/client'
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState<boolean>(!!getToken())
 
   useEffect(() => {
+    if (IS_DEMO) {
+      setToken('demo')
+      api.me().then(setUser).finally(() => setLoading(false))
+      return
+    }
     if (!getToken()) return
     api
       .me()

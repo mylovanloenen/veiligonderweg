@@ -4,6 +4,9 @@
  */
 export const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? 'http://localhost:8000'
 
+/** Demo-modus: statische snapshot in plaats van de echte API (zie demo.ts). Gebruikt voor GitHub Pages. */
+export const IS_DEMO = import.meta.env.VITE_DEMO === '1'
+
 export type CrimeCategoryKey = 'total' | 'violence' | 'robbery' | 'burglary' | 'theft' | 'nuisance'
 
 export interface CrimeCategory {
@@ -69,6 +72,8 @@ export class ApiError extends Error {
   }
 }
 
+import { demoApi } from './demo'
+
 const TOKEN_KEY = 'vo_token'
 
 export function getToken(): string | null {
@@ -107,7 +112,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return json as T
 }
 
-export const api = {
+const liveApi = {
   crimeCategories: () => request<{ data: CrimeCategory[] }>('/neighbourhoods/categories').then((r) => r.data),
 
   neighbourhoods: (category: CrimeCategoryKey, municipality = 'GM0363') =>
@@ -134,3 +139,5 @@ export const api = {
   logout: () => request<{ message: string }>('/auth/logout', { method: 'POST' }),
   me: () => request<{ data: User }>('/auth/me').then((r) => r.data),
 }
+
+export const api: typeof liveApi = IS_DEMO ? (demoApi as unknown as typeof liveApi) : liveApi

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type L from 'leaflet'
-import { api, ApiError, type CrimeCategory, type CrimeCategoryKey, type Incident, type IncidentCategory, type NeighbourhoodCollection } from './api/client'
+import { api, ApiError, IS_DEMO, type CrimeCategory, type CrimeCategoryKey, type Incident, type IncidentCategory, type NeighbourhoodCollection } from './api/client'
 import { useAuth } from './hooks/useAuth'
 import { EmergencyBanner } from './components/EmergencyBanner'
 import { MapView } from './components/MapView'
@@ -130,6 +130,11 @@ export default function App() {
   return (
     <div className="app">
       <EmergencyBanner />
+      {IS_DEMO && (
+        <div className="demo-banner">
+          Demo op GitHub Pages: statische snapshot van Amsterdam. Meldingen en stemmen worden niet opgeslagen.
+        </div>
+      )}
 
       <MapView
         neighbourhoods={neighbourhoods}
@@ -152,7 +157,7 @@ export default function App() {
             <span className="brand__logo" aria-hidden="true">🛡️</span>
             <div>
               <div className="brand__name">VeiligOnderweg</div>
-              <div className="brand__sub">Amsterdam · MVP</div>
+              <div className="brand__sub">Amsterdam · {IS_DEMO ? 'demo' : 'MVP'}</div>
             </div>
           </div>
           <div className="panel__auth">
