@@ -57,6 +57,14 @@ function FlyTo({ target }: { target: Props['flyTo'] }) {
   return null
 }
 
+/** Popups automatisch buiten het zijpaneel (desktop) of de bottom sheet (mobiel) laten schuiven. */
+function popupPanOptions(): L.PopupOptions {
+  const mobile = window.innerWidth <= 720
+  return mobile
+    ? { autoPanPaddingTopLeft: L.point(10, 60), autoPanPaddingBottomRight: L.point(10, Math.round(window.innerHeight * 0.46) + 20) }
+    : { autoPanPaddingTopLeft: L.point(380, 70), autoPanPaddingBottomRight: L.point(60, 40) }
+}
+
 const pickIcon = L.divIcon({ className: 'pick-marker', html: '<div class="pick-marker__pin"></div>', iconSize: [24, 24], iconAnchor: [12, 24] })
 
 function incidentIcon(incident: Incident): L.DivIcon {
@@ -100,6 +108,7 @@ export function MapView(props: Props) {
         (p.rate_per_1000 != null ? ` · ${p.rate_per_1000.toFixed(1)} per 1.000 inw.` : '') +
         (p.population != null ? `<br/><span class="muted">${p.population.toLocaleString('nl-NL')} inwoners</span>` : '') +
         `</div>`,
+      popupPanOptions(),
     )
   }
 
@@ -119,7 +128,7 @@ export function MapView(props: Props) {
 
       {incidents.map((incident) => (
         <Marker key={incident.id} position={[incident.lat, incident.lng]} icon={incidentIcon(incident)} zIndexOffset={1000} interactive={!pickingLocation}>
-          <Popup>
+          <Popup {...popupPanOptions()}>
             <div className="inc-popup">
               <div className="inc-popup__title" style={{ color: INCIDENT_COLORS[incident.category.slug] }}>
                 {INCIDENT_ICONS[incident.category.slug]} {incident.category.name}
