@@ -1,0 +1,47 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: veiligonderweg
+      POSTGRES_USER: veiligonderweg
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5433:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./docker/db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U veiligonderweg -d veiligonderweg"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: ./docker/api
+    working_dir: /app
+    command: sh -c "php artisan serve --host=0.0.0.0 --port=8000"
+    # Database-instellingen komen uit api/.env (DB_HOST=db). Bewust niet via `environment`,
+    # anders overschrijven OS-env-vars de testdatabase uit phpunit.xml.
+    volumes:
+      - ./api:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: node:20-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    environment:
+      VITE_API_URL: http://localhost:8000
+    volumes:
+      - ./web:/app
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  dbdata:
