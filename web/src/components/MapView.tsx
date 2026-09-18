@@ -21,18 +21,30 @@ interface Props {
   votedIds: Set<number>
 }
 
+function validBounds(b: L.LatLngBounds): boolean {
+  return b.getEast() > b.getWest() && b.getNorth() > b.getSouth()
+}
+
 function BoundsWatcher({ onBoundsChange }: { onBoundsChange: (b: L.LatLngBounds) => void }) {
   const map = useMapEvents({
     moveend: () => onBoundsChange(map.getBounds()),
+    resize: () => validBounds(map.getBounds()) && onBoundsChange(map.getBounds()),
   })
   useEffect(() => {
-    // Direct na mount heeft de container soms nog geen afmeting (bbox van 0 m2); wacht een frame.
-    const id = requestAnimationFrame(() => {
+    // Direct na mount heeft de container (zeker op mobiel) soms nog geen afmeting: even blijven proberen.
+    let tries = 0
+    let timer = 0
+    const attempt = () => {
       map.invalidateSize()
       const b = map.getBounds()
-      if (b.getEast() > b.getWest() && b.getNorth() > b.getSouth()) onBoundsChange(b)
-    })
-    return () => cancelAnimationFrame(id)
+      if (validBounds(b)) {
+        onBoundsChange(b)
+        return
+      }
+      if (tries++ < 40) timer = window.setTimeout(attempt, 250)
+    }
+    attempt()
+    return () => window.clearTimeout(timer)
   }, [map, onBoundsChange])
   return null
 }
