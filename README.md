@@ -5,16 +5,19 @@ Start met Amsterdam als testgebied. **Direct gevaar? Bel 112.**
 
 ## Installatie (5 commando's)
 
-Vereist: Docker Desktop en Node 20+.
+Vereist: alleen Docker Desktop.
 
 ```bash
-docker compose up -d db api
-docker compose run --rm api sh -c "php artisan migrate --seed && php artisan geo:import-neighbourhoods && php artisan crime:import --compute"
-cd web && npm install && npm run dev
+git clone <repo-url> veiligonderweg && cd veiligonderweg
+docker compose up -d --build
+docker compose run --rm api php artisan migrate --seed
+docker compose run --rm api php artisan geo:import-neighbourhoods
+docker compose run --rm api php artisan crime:import --compute
 ```
 
 - API: http://localhost:8000 (healthcheck `/up`)
-- Web: http://localhost:5173
+- Web: http://localhost:5173 (Vite in Docker, hot reload werkt via de bind mount)
+- Scheduler: container `scheduler` draait `php artisan schedule:work` (anonimisering elk uur)
 - Demo-accounts: `demo@veiligonderweg.local` en `buur@veiligonderweg.local`, wachtwoord `demo1234` (of maak zelf een account)
 
 De import haalt 519 Amsterdamse buurten op bij PDOK en 17 delicttypen bij de politie-OData (duurt ~1 minuut, de

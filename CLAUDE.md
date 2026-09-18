@@ -8,19 +8,22 @@ politie-open-data en (2) live meldingen van gebruikers die automatisch verlopen.
 - `api/` — Laravel 13 (PHP 8.4) als pure REST-API (JSON, geen Blade). Auth via Laravel Sanctum-tokens.
 - `db` — PostgreSQL 16 + PostGIS 3.4 (image `postgis/postgis:16-3.4`).
 - `web/` — React 19 + Vite + TypeScript, Leaflet/react-leaflet met OpenStreetMap-tiles.
-- Alles draait via `docker-compose.yml` (services `db`, `api`, `web`). PHP/Composer staan niet lokaal; gebruik de container.
+- Alles draait via `docker-compose.yml` (services `db`, `api`, `scheduler`, `web`). PHP/Composer staan niet lokaal; gebruik de container.
 - Later: React Native (Expo) app op dezelfde API. Houd daarom alle logica in de API, de frontend is een dunne client
   (`web/src/api/client.ts` is framework-loos en herbruikbaar).
 
 ## Starten
 
 ```bash
-docker compose up -d db api            # database + API op http://localhost:8000
+docker compose up -d --build           # db, api (http://localhost:8000), scheduler en web (http://localhost:5173)
 docker compose run --rm api php artisan migrate --seed
 docker compose run --rm api php artisan geo:import-neighbourhoods --municipality=GM0363
 docker compose run --rm api php artisan crime:import --municipality=GM0363 --year=2025 --compute
-docker compose up -d web               # frontend op http://localhost:5173 (of: cd web && npm install && npm run dev)
 ```
+
+De `web`-service draait Vite in een node-container met een eigen `node_modules`-volume (Linux-binaries), dus lokaal
+`npm install` is niet nodig. Wil je toch lokaal draaien: `cd web && npm install && npm run dev`. De `scheduler`-service
+draait `php artisan schedule:work` (o.a. `incidents:anonymise` elk uur).
 
 Tests (draaien tegen de PostGIS-testdatabase `veiligonderweg_test`, aangemaakt door `docker/db/10-create-test-db.sh`):
 

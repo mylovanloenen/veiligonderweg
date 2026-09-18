@@ -30,14 +30,27 @@ services:
       db:
         condition: service_healthy
 
+  # Laravel-scheduler (o.a. incidents:anonymise elk uur).
+  scheduler:
+    build: ./docker/api
+    working_dir: /app
+    command: sh -c "php artisan schedule:work"
+    volumes:
+      - ./api:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
   web:
     image: node:20-alpine
     working_dir: /app
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173 --strictPort"
     environment:
       VITE_API_URL: http://localhost:8000
     volumes:
       - ./web:/app
+      # Eigen node_modules in de container (Linux-binaries), los van die op de host (macOS).
+      - web_node_modules:/app/node_modules
     ports:
       - "5173:5173"
     depends_on:
@@ -45,3 +58,4 @@ services:
 
 volumes:
   dbdata:
+  web_node_modules:
