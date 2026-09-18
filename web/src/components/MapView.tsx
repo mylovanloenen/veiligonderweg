@@ -75,9 +75,10 @@ export function MapView(props: Props) {
   const { neighbourhoods, showStats, incidents, onBoundsChange, pickingLocation, pickedLocation, onPickLocation, flyTo, onConfirm, onDispute, canVote, votedIds } = props
 
   // Key forceert een nieuwe GeoJSON-laag bij andere data/categorie (react-leaflet muteert anders niet).
+  // Tijdens het kiezen van een meldlocatie zijn de lagen niet klikbaar, anders vangt de buurt-popup de klik af.
   const geoKey = useMemo(
-    () => (neighbourhoods ? `${neighbourhoods.meta.category}-${neighbourhoods.meta.year}-${neighbourhoods.features.length}` : 'none'),
-    [neighbourhoods],
+    () => (neighbourhoods ? `${neighbourhoods.meta.category}-${neighbourhoods.meta.year}-${neighbourhoods.features.length}-${pickingLocation}` : 'none'),
+    [neighbourhoods, pickingLocation],
   )
 
   const style = (feature?: GeoJSON.Feature): L.PathOptions => {
@@ -113,11 +114,11 @@ export function MapView(props: Props) {
       <FlyTo target={flyTo} />
 
       {showStats && neighbourhoods && (
-        <GeoJSON key={geoKey} data={neighbourhoods as unknown as GeoJSON.FeatureCollection} style={style} onEachFeature={onEachFeature} />
+        <GeoJSON key={geoKey} data={neighbourhoods as unknown as GeoJSON.FeatureCollection} style={style} onEachFeature={onEachFeature} interactive={!pickingLocation} />
       )}
 
       {incidents.map((incident) => (
-        <Marker key={incident.id} position={[incident.lat, incident.lng]} icon={incidentIcon(incident)} zIndexOffset={1000}>
+        <Marker key={incident.id} position={[incident.lat, incident.lng]} icon={incidentIcon(incident)} zIndexOffset={1000} interactive={!pickingLocation}>
           <Popup>
             <div className="inc-popup">
               <div className="inc-popup__title" style={{ color: INCIDENT_COLORS[incident.category.slug] }}>

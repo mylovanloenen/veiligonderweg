@@ -15,7 +15,7 @@ cd web && npm install && npm run dev
 
 - API: http://localhost:8000 (healthcheck `/up`)
 - Web: http://localhost:5173
-- Demo-account: `demo@veiligonderweg.local` / `demo1234` (of maak zelf een account in de app)
+- Demo-accounts: `demo@veiligonderweg.local` en `buur@veiligonderweg.local`, wachtwoord `demo1234` (of maak zelf een account)
 
 De import haalt 519 Amsterdamse buurten op bij PDOK en 17 delicttypen bij de politie-OData (duurt ~1 minuut, de
 CBS-server is traag). Draai `crime:import --compute` periodiek om de cijfers te verversen.

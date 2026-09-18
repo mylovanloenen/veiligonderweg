@@ -12,10 +12,14 @@ class DemoIncidentSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::firstOrCreate(
-            ['email' => 'demo@veiligonderweg.local'],
-            ['name' => 'Demo', 'password' => 'demo1234']
-        );
+        // Twee demo-accounts, zodat je met het ene account de meldingen van het andere kunt beoordelen.
+        $users = [
+            User::firstOrCreate(['email' => 'demo@veiligonderweg.local'], ['name' => 'Demo', 'password' => 'demo1234']),
+            User::firstOrCreate(['email' => 'buur@veiligonderweg.local'], ['name' => 'Buur', 'password' => 'demo1234']),
+        ];
+        // Seeder is herhaalbaar: oude demo-meldingen eerst opruimen.
+        Incident::whereIn('user_id', array_map(fn ($u) => $u->id, $users))->delete();
+
         $categories = IncidentCategory::all()->keyBy('slug');
 
         $demo = [
@@ -31,12 +35,12 @@ class DemoIncidentSeeder extends Seeder
             ['overig', 52.3620, 4.9060, 'Glas over de hele stoep, uitkijken met fietsen.', 110],
         ];
 
-        foreach ($demo as [$slug, $lat, $lng, $text, $minutesAgo]) {
+        foreach ($demo as $i => [$slug, $lat, $lng, $text, $minutesAgo]) {
             $category = $categories[$slug];
             $createdAt = now()->subMinutes($minutesAgo);
             $incident = Incident::createAt([
                 'incident_category_id' => $category->id,
-                'user_id' => $user->id,
+                'user_id' => $users[$i % 2]->id,
                 'description' => $text,
                 'expires_at' => $createdAt->copy()->addMinutes($category->ttl_minutes),
             ], $lat, $lng);
